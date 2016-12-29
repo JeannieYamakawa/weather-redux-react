@@ -1,16 +1,21 @@
 import React, {Component} from 'react';
+import { connect } from 'react-redux';
+import { bindActionCreators } from 'redux';
+import { fetchWeather } from '../actions/index'
 
 
-export default class SearchBar extends Component{
+class SearchBar extends Component{
     constructor(props){
         super(props);
     //sets initial component-level state only
         this.state = {term: ''};
 
-        //the purpose for the line below is to bind the context of onInputChange's 'this' to the return onChange callback function
+        //the purpose for the two bind lines below is to bind the context of onInputChange's 'this' to the return onChange callback function
         //the right side of the equals sign's 'this' is the instance of the searchbar. it already has a function called 'onInputChange,' but it's saying 'bind that function to 'this', which is search bar, and then replace the existing function with it (right side of =)'...in other words, overwriting the local method.
         //perform this line below whenever the callback has a reference to 'this'
         this.onInputChange = this.onInputChange.bind(this);
+        //!!!^^^!!!^^^!!!^^^!!!^^^!!!
+        this.onFormSubmit = this.onFormSubmit.bind(this);
         //!!!^^^!!!^^^!!!^^^!!!^^^!!!
     }
 
@@ -22,9 +27,10 @@ export default class SearchBar extends Component{
 
     onFormSubmit(event){
         event.preventDefault();
-        //fetch weather data. format:
-        // api.openweathermap.org/data/2.5/forecast?q={city name},{country code}
-        
+        //fetch weather data in the action creator first.
+        this.props.fetchWeather(this.state.term);
+        //clear the search input for next time after form submisson
+        this.setState({term: ''})
     }
 
 
@@ -49,3 +55,11 @@ export default class SearchBar extends Component{
         );
     }
 }
+
+
+function mapDispatchToProps(dispatch){
+    return bindActionCreators({ fetchWeather }, dispatch);
+}
+
+//passing null as first argument is just saying 'we dont need state there at the first arg'
+export default connect(null, mapDispatchToProps)(SearchBar);
